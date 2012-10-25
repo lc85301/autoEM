@@ -71,27 +71,21 @@ source ~/.bashrc
 rm -rf ~/autoEM/sondata/%s
 em ~/autoEM/%s.son
 """
-
 def exec_command(filename):
 	#setup log file
-	paramiko.util.log_to_file('autoEM.log')
 	info = get_user_info()
-
 	try:
-		t = paramiko.Transport((info.hostname,info.port))
-		t.connect(username=info.username, password=info.password, hostkey=info.hostkey)
-		cmd_channel = t.open_session()
-		try:
-			cmd_channel.exec_command('screen -S autoEM -d -m ~/autoEM/command.sh %s' % filename)
-		except SSHException:
-			print 'execute command error'
-	except Exception, e:
+		ssh = paramiko.SSHClient()
+		ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+		ssh.connect(info.hostname, username=info.username, password = info.password)
+		stdin, stdout, stderr = ssh.exec_command('source ~/.bashrc; nohup em ~/autoEM/%s </dev/null >em.log 2>&1 &' % filename)
+		#stdout.readline()
+		stderr.readline()
+	except exception, e:
 		print '*** Caught exception %s: %s ***' % (e.__class__, e)
 		traceback.print_exc()
-		try:
-			t.close()
-		except:
-			pass
+	finally:
+		ssh.close()
 		sys.exit(1)
 
 def get_user_info():
@@ -138,6 +132,9 @@ def get_user_info():
 	Info = collections.namedtuple("Info", "username, hostname, password, port, hostkeytype, hostkey")
 	return Info(username, hostname, password, port, hostkeytype, hostkey)
 
+def add_workstaion():
+	"""upload command to workstation"""
+
 def download_file(filename):
 	"""download file to workstation"""
 	info = get_user_info()
@@ -178,6 +175,9 @@ def main():
 						option_list=option_list)
 	options, args = parser.parse_args()
 
+	if options.add:
+		add_workstaion()
+		sys.exit(0)
 	if options.version:
 		version()
 		sys.exit(0)
@@ -200,7 +200,6 @@ def main():
 	if options.run:
 		#run the specify command, this command will delete extension automatically
 		sonfile = os.path.splitext(options.run)[0]
-		print("exec file: " + sonfile)
 		exec_command(sonfile)
 		sys.exit(0)
 	if len(args) == 0:

@@ -2,5 +2,10 @@
 autoEM Changelog
 ------------------------------------------------------------------------------
 
+autoEM 0.1.1 (十月 23, 2012):
+	Feature added:
+	* Add autoEM.py, using paramiko package
+	  aimed to offer a windows interface
+
 autoEM 0.1.0 (十月 17, 2012):
 	* Initial release
