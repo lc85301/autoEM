@@ -1,6 +1,0 @@
-autoEM is a interface that manage the files and instruction on workstation via ssh protocol
-
-1. allow user to upload/download the simulation file to/from workstation
-2. run the time consumed simulation through ssh, and jump out notification if simulation is over
-
-No available install method for now =w=
