@@ -1,0 +1,18 @@
+因為平時工作需要利用工作站進行大家電磁模擬
+這時候，我必須：
+1. 在本地端畫好電磁模擬檔
+2. 利用filezilla, scp等把檔案丟上工作站
+	(找檔案，上傳檔案…)
+	這時候還要看哪個工作站還在正常運作
+3. 利用putty, ssh連上工作站，刪除上次的模擬資料，跑模擬
+4. 等模擬結束
+5. 用filezilla下載模擬結果
+這些都是dirty work，因此我寫了這個程式
+
+主要就是要用提供一個簡單的介面
+autoEM -u simulation_file
+autoEM -d simulation_result
+autoEM -r simulation_file
+來上傳/下載/執行模擬的檔案
+
+目前沒有任何一種安裝方式，哈哈哈哈
