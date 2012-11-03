@@ -2,6 +2,11 @@
 autoEM Changelog
 ------------------------------------------------------------------------------
 
+autoEM 0.2.0 (十一月 03, 2012):
+	Feature added:
+	* Wrap autoEM into class base.py, add gui.py for graphic interface
+	  Using pygtk to write the graphic interface
+
 autoEM 0.1.1 (十月 23, 2012):
 	Feature added:
 	* Add autoEM.py, using paramiko package
