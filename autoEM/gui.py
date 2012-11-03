@@ -51,8 +51,6 @@ COLUMN_USAGE,
 class autoEMGui(autoEMBase):
 	"""docstring for ClassName"""
 	def __init__(self):
-		Info = self.parseRecord()
-
 		##########Window##########
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
 		self.window.set_size_request(500,500)
@@ -70,8 +68,10 @@ class autoEMGui(autoEMBase):
 		self.download = gtk.Button('download')
 		self.add = gtk.Button('add')
 		self.remove = gtk.Button('remove')
+		self.about = gtk.Button('About')
 		#file scroll window
 		self.sw_file = gtk.ScrolledWindow()
+		self.sw_file.set_size_request(200, 400)
 		self.sw_file.set_shadow_type(gtk.SHADOW_ETCHED_IN)
 		self.sw_file.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 		#file listview
@@ -79,6 +79,13 @@ class autoEMGui(autoEMBase):
 			gobject.TYPE_BOOLEAN,
 			gobject.TYPE_STRING,
 			gobject.TYPE_STRING)
+		for item in self.list_file():
+			iter = self.file_listbox.append()
+			self.file_listbox.set(iter,
+				COLUMN_FIXED, False,
+				COLUMN_SIMULATION, item,
+				COLUMN_STATUS, ''
+				)
 		#file treeview
 		self.treeview_file = gtk.TreeView(self.file_listbox)
 		self.treeview_file.set_rules_hint(True)
@@ -92,10 +99,10 @@ class autoEMGui(autoEMBase):
 		self.host_listbox = gtk.ListStore(
 			gobject.TYPE_STRING,
 			gobject.TYPE_STRING)
-		for item in Info.find('Servers').findall('Host'):
+		for item in self.list_host():
 			iter = self.host_listbox.append()
 			self.host_listbox.set(iter,
-				COLUMN_HOST, item.text,
+				COLUMN_HOST, item,
 				COLUMN_USAGE, '')
 			
 		#host treeview
@@ -112,8 +119,6 @@ class autoEMGui(autoEMBase):
 		##pack two scroll window		
 		self.sw_file.add(self.treeview_file)
 		self.sw_host.add(self.treeview_host)
-		#test.pack_start(self.sw_file, True, True, 5)
-		#test.pack_start(self.sw_host, True, True, 5)
 
 		#file_bottombox
 		file_bottombox.pack_start(self.upload, False, False, 5)
@@ -122,9 +127,10 @@ class autoEMGui(autoEMBase):
 		#host_bottombox
 		host_bottombox.pack_start(self.add, False, False, 5)
 		host_bottombox.pack_start(self.remove, False, False, 5)
+		host_bottombox.pack_end(self.about, False, False, 5)
 		#table pack
-		table.attach(self.sw_file, 0, 1, 0, 1)
-		table.attach(self.sw_host, 1, 2, 0, 1)
+		table.attach(self.sw_file, 0, 1, 0, 1, yoptions=gtk.EXPAND|gtk.FILL)
+		table.attach(self.sw_host, 1, 2, 0, 1, yoptions=gtk.EXPAND|gtk.FILL)
 		table.attach(file_bottombox, 0, 1, 1, 2)
 		table.attach(host_bottombox, 1, 2, 1, 2)
 
@@ -134,6 +140,7 @@ class autoEMGui(autoEMBase):
 		self.window.add(Mainbox)
 
 		#Connect
+		gobject.timeout_add(5000, self.update_usage())
 
 		#Main
 		self.window.show_all()
@@ -164,7 +171,7 @@ class autoEMGui(autoEMBase):
 		column = gtk.TreeViewColumn('Workstation Host', gtk.CellRendererText(), text=COLUMN_HOST)
 		treeview.append_column(column)
 		# column for simulation status
-		column = gtk.TreeViewColumn('USAGE', gtk.CellRendererText(), text=COLUMN_USAGE)
+		column = gtk.TreeViewColumn('Usage', gtk.CellRendererText(), text=COLUMN_USAGE)
 		treeview.append_column(column)
 
 	def fixed_toggled(self, cell, path, model):
@@ -175,6 +182,11 @@ class autoEMGui(autoEMBase):
 		fixed = not fixed
 		# set new value
 		model.set(iter, COLUMN_FIXED, fixed)
+
+	def update_usage(self):
+		for item in self.list_host():
+			iter = self.host_listbox.get_iter_first()
+			self.host_listbox.set_value(iter, COLUMN_USAGE, 'XD') 
 
 def main():
 	"""docstring for main"""
