@@ -4,7 +4,13 @@
 		<username></username>
 	</LastUser>
 	<Servers>
+		<Host></Host>
 	</Servers>
 	<Simulations>
+		<Simulation>
+			<Name></Name>
+			<Host></Host>
+			<Status></Status>
+		</Simulation>
 	</Simulations>
 </autoEM>
