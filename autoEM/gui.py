@@ -32,63 +32,104 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
+import gobject
 
 #autoEM package
 from autoEM.base import autoEMBase
 from autoEM.misc import *
 
+(
+COLUMN_FIXED,
+COLUMN_SIMULATION,
+COLUMN_STATUS,
+) = range(3)
+(
+COLUMN_HOST,
+COLUMN_USAGE,
+) = range(2)
+
 class autoEMGui(autoEMBase):
 	"""docstring for ClassName"""
-	def update_local(self):
-		"""update the  local window"""
-	def update_remote(self):
-		"""update the check button in remote window"""
-
 	def __init__(self):
-		#Info = self.parseRecord()
-		for child in super().Info:
-			print(child.tag)
+		Info = self.parseRecord()
 
-		#create window
+		##########Window##########
 		self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-		self.window.set_size_request(400,300)
+		self.window.set_size_request(500,500)
+		self.window.set_resizable(False)
 		self.window.set_title(program_name)
 		self.window.set_position(gtk.WIN_POS_CENTER_ALWAYS)
 		self.window.set_border_width(10)
 		
 		##########Widget##########
+		#top label
+		self.label = gtk.Label('Choose the simulation you want to run.')
 		#button
 		self.upload = gtk.Button('upload')
 		self.execute = gtk.Button('run')
 		self.download = gtk.Button('download')
+		self.add = gtk.Button('add')
+		self.remove = gtk.Button('remove')
+		#file scroll window
+		self.sw_file = gtk.ScrolledWindow()
+		self.sw_file.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+		self.sw_file.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+		#file listview
+		self.file_listbox = gtk.ListStore(
+			gobject.TYPE_BOOLEAN,
+			gobject.TYPE_STRING,
+			gobject.TYPE_STRING)
+		#file treeview
+		self.treeview_file = gtk.TreeView(self.file_listbox)
+		self.treeview_file.set_rules_hint(True)
+		self.add_column_file(self.treeview_file)
 
-		# create tree view
-		#model = self.list_model()
-		#treeview = gtk.TreeView(model)
-		#treeview.set_rules_hint(True)
-		#treeview.set_search_column(COLUMN_DESCRIPTION)
+		#host scroll window
+		self.sw_host = gtk.ScrolledWindow()
+		self.sw_host.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+		self.sw_host.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+		#host listview
+		self.host_listbox = gtk.ListStore(
+			gobject.TYPE_STRING,
+			gobject.TYPE_STRING)
+		for item in Info.find('Servers').findall('Host'):
+			iter = self.host_listbox.append()
+			self.host_listbox.set(iter,
+				COLUMN_HOST, item.text,
+				COLUMN_USAGE, '')
+			
+		#host treeview
+		self.treeview_host = gtk.TreeView(self.host_listbox)
+		self.treeview_host.set_rules_hint(True)
+		self.add_column_host(self.treeview_host)
 
 		##########Layout##########
 		Mainbox = gtk.VBox()
-		upbox = gtk.HBox()
-		bottombox = gtk.HBox()
-		rightbox = gtk.VBox()
-		leftbox = gtk.VBox()
+		file_bottombox = gtk.HBox()
+		host_bottombox = gtk.HBox()
+		table = gtk.Table(rows = 2, columns = 2, homogeneous=False)
 
-		listbox = gtk.ScrolledWindow()
-		listbox.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-		listbox.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-		#listbox.add(self.treeview)
+		##pack two scroll window		
+		self.sw_file.add(self.treeview_file)
+		self.sw_host.add(self.treeview_host)
+		#test.pack_start(self.sw_file, True, True, 5)
+		#test.pack_start(self.sw_host, True, True, 5)
 
-		bottombox.pack_start(self.upload, False, False, 5)
-		bottombox.pack_start(self.execute, False, False, 5)
-		bottombox.pack_start(self.download, False, False, 5)
+		#file_bottombox
+		file_bottombox.pack_start(self.upload, False, False, 5)
+		file_bottombox.pack_start(self.execute, False, False, 5)
+		file_bottombox.pack_start(self.download, False, False, 5)
+		#host_bottombox
+		host_bottombox.pack_start(self.add, False, False, 5)
+		host_bottombox.pack_start(self.remove, False, False, 5)
+		#table pack
+		table.attach(self.sw_file, 0, 1, 0, 1)
+		table.attach(self.sw_host, 1, 2, 0, 1)
+		table.attach(file_bottombox, 0, 1, 1, 2)
+		table.attach(host_bottombox, 1, 2, 1, 2)
 
-		upbox.pack_start(leftbox, False, False, 5)
-		upbox.pack_start(rightbox, False, False, 5)
-
-		Mainbox.pack_start(upbox, False, False, 5)
-		Mainbox.pack_start(bottombox, False, False, 5)
+		Mainbox.pack_start(self.label, False, False, 5)
+		Mainbox.pack_start(table, False, False, 5)
 
 		self.window.add(Mainbox)
 
@@ -97,6 +138,43 @@ class autoEMGui(autoEMBase):
 		#Main
 		self.window.show_all()
 		gtk.main()
+
+	def add_column_file(self, treeview):
+		"""add default column in treeview"""
+		model = treeview.get_model()
+		# column for fixed toggles
+		renderer = gtk.CellRendererToggle()
+		renderer.connect('toggled', self.fixed_toggled, model)
+		column = gtk.TreeViewColumn('Fixed', renderer, active=COLUMN_FIXED)
+		# set this column to a fixed sizing(of 50 pixels)
+		column.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
+		column.set_fixed_width(50)
+		treeview.append_column(column)
+		# column for simulation name
+		column = gtk.TreeViewColumn('Simulation', gtk.CellRendererText(), text=COLUMN_SIMULATION)
+		treeview.append_column(column)
+		# column for simulation status
+		column = gtk.TreeViewColumn('Status', gtk.CellRendererText(), text=COLUMN_STATUS)
+		treeview.append_column(column)
+
+	def add_column_host(self, treeview):
+		"""add default column in treeview"""
+		model = treeview.get_model()
+		# column for simulation name
+		column = gtk.TreeViewColumn('Workstation Host', gtk.CellRendererText(), text=COLUMN_HOST)
+		treeview.append_column(column)
+		# column for simulation status
+		column = gtk.TreeViewColumn('USAGE', gtk.CellRendererText(), text=COLUMN_USAGE)
+		treeview.append_column(column)
+
+	def fixed_toggled(self, cell, path, model):
+		# get toggled iter
+		iter = model.get_iter((int(path),))
+		fixed = model.get_value(iter, COLUMN_FIXED)
+		# do something with the value
+		fixed = not fixed
+		# set new value
+		model.set(iter, COLUMN_FIXED, fixed)
 
 def main():
 	"""docstring for main"""
