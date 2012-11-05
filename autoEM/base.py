@@ -50,7 +50,6 @@ class autoEMBase:
 	def add_workstaion(self, host):
 		"""add a workstation record to xml"""
 		ET.subelement
-
 	
 	def list_host(self):
 		"""return the list with all host in record"""
@@ -58,6 +57,10 @@ class autoEMBase:
 		for host in self.Info.find('Servers').findall('Host'):
 			hostlist.append(host.text)
 		return hostlist
+
+	def list_info(self):
+		"""return a tuple contain user info"""
+		pass
 
 	def list_file(self):
 		"""check the file in local directory and list all the .son files"""
@@ -71,8 +74,7 @@ class autoEMBase:
 
 	##################Paramiko(SSH) related function##################
 	def exec_remote_command(command, info):
-		"""execute the command on the remote maching,
-		return the stdout and stderr"""
+		"""execute the command on the remote maching, return the stdout and stderr"""
 		#setup log file
 		#info = get_user_info()
 		try:
@@ -86,7 +88,6 @@ class autoEMBase:
 			traceback.print_exc()
 		finally:
 			ssh.close()
-			sys.exit(1)
 
 	def download_file(filename, info):
 		"""download file to workstation"""
@@ -112,24 +113,26 @@ class autoEMBase:
 		for host in list_host():
 			print host
 
-	def get_usage():
-		"""check the status of workstation loading"""
-		command = 'uptime'
-		stdout, stderr = exec_remote_command(command)
-		print(stdout.readline())
+	def get_usage(self):
+		"""check the status of workstation loading, return a list about usage in all host"""
+		status = []
+		for host in self.list_host():
+			command = 'uptime'
+			stdout, stderr = self.exec_remote_command(command)
+			print(stdout.readline())
 
-		command = 'free'
-		stdout, stderr = exec_remote_command(command)
-		print(stdout.readline())
+			command = 'free'
+			stdout, stderr = self.exec_remote_command(command)
+			print(stdout.readline())
 
-	def run(filename):
+		return status
+
+	def run(self,filename):
 		"""run em simulation"""
 		command = 'source ~/.bashrc; nohup em ~/autoEM/%s </dev/null >em.log 2>&1 &' % filename
-		stdout, stderr = exec_remote_command(command)
+		stdout, stderr = self.exec_remote_command(command)
 		stdout.readline()
 		stderr.readline()
-
-
 
 #sftp = paramiko.SFTPClient.from_transport(t)
 #try:

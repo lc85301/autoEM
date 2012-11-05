@@ -140,7 +140,7 @@ class autoEMGui(autoEMBase):
 		self.window.add(Mainbox)
 
 		#Connect
-		gobject.timeout_add(5000, self.update_usage())
+		gobject.timeout_add(5000, self.update_usage)
 
 		#Main
 		self.window.show_all()
@@ -184,9 +184,10 @@ class autoEMGui(autoEMBase):
 		model.set(iter, COLUMN_FIXED, fixed)
 
 	def update_usage(self):
-		for item in self.list_host():
-			iter = self.host_listbox.get_iter_first()
-			self.host_listbox.set_value(iter, COLUMN_USAGE, 'XD') 
+		host_list = self.list_host()
+		status = self.get_usage()
+		for item in range(len(host_list)):
+			self.host_listbox[item][COLUMN_USAGE] = 'XD'
 
 def main():
 	"""docstring for main"""
