@@ -2,6 +2,10 @@
 autoEM Changelog
 ------------------------------------------------------------------------------
 
+autoEM 0.2.1 (十一月 07, 2012):
+	Feature added:
+	* complete basic add/remove workstation function
+
 autoEM 0.2.0 (十一月 03, 2012):
 	Feature added:
 	* Wrap autoEM into class base.py, add gui.py for graphic interface
