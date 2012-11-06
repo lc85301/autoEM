@@ -27,6 +27,7 @@
 
 #predefine library
 import os
+import sys
 import getpass
 import traceback
 import collections
@@ -42,25 +43,34 @@ class autoEMBase:
 		pass
 
 	##################Record related function##################
-	Tree = ET.parse('example.xml')
-	Info = Tree.getroot()
+	Tree = ET.parse(config_file)
+	Record = Tree.getroot()
+	info = ('', '','','','','')
 	def refreshRecord(self):
-		Tree.write('example.xml')
+		self.Tree.write(config_file, encoding='utf-8')
+
+	def remove_workstation(self, host):
+		"""remove a workstation from xml"""
+		parent = self.Record.find('Servers')
+		for child in parent.findall('Host'):
+			print(child.text)
+			if child.text == host:
+				parent.remove(child)
+		self.refreshRecord()
 
 	def add_workstaion(self, host):
 		"""add a workstation record to xml"""
-		ET.subelement
+		parent = self.Record.find('Servers')
+		node = ET.SubElement(parent, 'Host')
+		node.text = host 
+		self.refreshRecord()
 	
 	def list_host(self):
 		"""return the list with all host in record"""
 		hostlist = []
-		for host in self.Info.find('Servers').findall('Host'):
+		for host in self.Record.find('Servers').findall('Host'):
 			hostlist.append(host.text)
 		return hostlist
-
-	def list_info(self):
-		"""return a tuple contain user info"""
-		pass
 
 	def list_file(self):
 		"""check the file in local directory and list all the .son files"""
@@ -73,17 +83,17 @@ class autoEMBase:
 		return filelist
 
 	##################Paramiko(SSH) related function##################
-	def exec_remote_command(command, info):
+	def exec_remote_command(command):
 		"""execute the command on the remote maching, return the stdout and stderr"""
 		#setup log file
 		#info = get_user_info()
 		try:
 			ssh = paramiko.SSHClient()
 			ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-			ssh.connect(info.hostname, username=info.username, password = info.password)
+			ssh.connect()
 			stdin, stdout, stderr = ssh.exec_command(command)
 			return stdout, stderr
-		except exception, e:
+		except Exception, e:
 			print '*** Caught exception %s: %s ***' % (e.__class__, e)
 			traceback.print_exc()
 		finally:
@@ -118,7 +128,11 @@ class autoEMBase:
 		status = []
 		for host in self.list_host():
 			command = 'uptime'
-			stdout, stderr = self.exec_remote_command(command)
+			try:
+				stdout, stderr = self.exec_remote_command(command)
+			except Exception, e:
+				pass
+
 			print(stdout.readline())
 
 			command = 'free'

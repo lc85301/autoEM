@@ -25,6 +25,7 @@
 
 import sys
 import platform
+import collections
 
 #os Information
 running_os = platform.system()
@@ -37,4 +38,8 @@ if running_os == "Windows":
 	program_logo = 'autoEM.png'
 
 #configure file storage
-configfile = "default.xml"
+config_file = "example.xml"
+
+#Info type
+Info = collections.namedtuple("Info", "username, hostname, password, port")
+

@@ -108,6 +108,8 @@ class autoEMGui(autoEMBase):
 		#host treeview
 		self.treeview_host = gtk.TreeView(self.host_listbox)
 		self.treeview_host.set_rules_hint(True)
+		self.host_selection = self.treeview_host.get_selection()
+		self.host_selection.set_mode(gtk.SELECTION_SINGLE)
 		self.add_column_host(self.treeview_host)
 
 		##########Layout##########
@@ -140,11 +142,26 @@ class autoEMGui(autoEMBase):
 		self.window.add(Mainbox)
 
 		#Connect
-		gobject.timeout_add(5000, self.update_usage)
+		#gobject.timeout_add(5000, self.update_usage)
+		self.add.connect('clicked', self.gui_add_workstation)
+		self.remove.connect('clicked', self.gui_remove_workstation)
 
 		#Main
 		self.window.show_all()
 		gtk.main()
+	
+	def gui_remove_workstation(self, widget):
+		"""show warning, call remove_workstation, update liststore"""
+		model, iter = self.host_selection.get_selected()
+		if iter is None:
+			pass
+		else:
+			self.remove_workstation(model.get_value(iter,0))
+
+
+	def gui_add_workstation(self):
+		"""show pop out, get host and call add_workstaion, update liststore"""
+		self.add_workstaion()
 
 	def add_column_file(self, treeview):
 		"""add default column in treeview"""
