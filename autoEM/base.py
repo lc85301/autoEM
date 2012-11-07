@@ -45,7 +45,7 @@ class autoEMBase:
 	##################Record related function##################
 	Tree = ET.parse(config_file)
 	Record = Tree.getroot()
-	info = ('', '','','','','')
+	info = Info('','')
 	def refreshRecord(self):
 		self.Tree.write(config_file, encoding='utf-8')
 
@@ -57,6 +57,9 @@ class autoEMBase:
 			if child.text == host:
 				parent.remove(child)
 		self.refreshRecord()
+
+	def set_info(self, username, password):
+		self.info._replace(username=username, password=password)
 
 	def add_workstaion(self, host):
 		"""add a workstation record to xml"""
@@ -130,14 +133,15 @@ class autoEMBase:
 			command = 'uptime'
 			try:
 				stdout, stderr = self.exec_remote_command(command)
+				print(stdout.readline())
+				print(stderr.readline())
 			except Exception, e:
 				pass
 
-			print(stdout.readline())
 
-			command = 'free'
-			stdout, stderr = self.exec_remote_command(command)
-			print(stdout.readline())
+			#command = 'free'
+			#stdout, stderr = self.exec_remote_command(command)
+			#print(stdout.readline())
 
 		return status
 

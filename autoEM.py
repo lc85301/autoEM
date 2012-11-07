@@ -52,16 +52,6 @@ Written by YodaLee <lc85301@gmail.com>.\n' % (program_name, program_version)
 def main():
 	#"""the main function of autoEM"""
 	option_list = [
-		make_option('-u', '--upload', action='store', dest='upload',
-					default=False, help='upload a file to workstation'),
-		make_option('-d', '--download', action='store', dest='download',
-					default=False, help='download a file from workstation'),
-		make_option('-a', '--add', action='store',dest='add',
-					default=False, help='add workstion to available list'),
-		make_option('-r', '--run', action='store', dest='run',
-					default=False, help='run simulation on workstation'),
-		make_option('-m', '--monitor', action='store_true', dest='monitor',
-					default=False, help='monitor the situation of workstation'),
 		make_option('-v', '--version', action='store_true', dest='version',
 					default=False, help='show version information')
 		]
@@ -76,34 +66,6 @@ def main():
 	from autoEM.gui import autoEMGui
 	autoEMGui()
 	sys.exit()
-	#if options.add:
-	#	add_workstaion()
-	#	sys.exit(0)
-	#if options.upload:
-	#	#here we assume the upload file is placed with program file
-	#	program_dir = os.getcwd()
-	#	uploadfile = os.path.join(program_dir, options.upload)
-	#	if os.path.isfile(uploadfile) and not os.path.islink(uploadfile):
-	#		if not uploadfile.endswith(".son"):
-	#			print("The file you specify may not be a sonnet file, upload will continue.")
-	#		upload_file(options.upload)
-	#	else:
-	#		sys.stderr.write("Can't find the upload file\n")
-	#		sys.exit(1)
-	#	sys.exit(0)
-	#if options.download:
-	#	#also, download the file to folder with program
-	#	download_file(options.download)
-	#	sys.exit(0)
-	#if options.run:
-	#	#run the specify command, this command will delete extension automatically
-	#	sonfile = os.path.splitext(options.run)[0]
-	#	exec_command(sonfile)
-	#	sys.exit(0)
-	#if len(args) == 0:
-	#	sys.stderr.write("No specify action to be done.\n")
-	#	sys.exit(1)
-		
 	
 if __name__ == '__main__':
 	try:
@@ -113,4 +75,3 @@ if __name__ == '__main__':
 			print '\nAborted.'
 		else:
 			print 'error:', e
-

@@ -48,5 +48,5 @@ if not sys.argv[0].startswith('/usr/bin'):
 config_file = "example.xml"
 
 #Info type
-Info = collections.namedtuple("Info", "username, hostname, password, port")
+Info = collections.namedtuple("Info", "username, password")
 

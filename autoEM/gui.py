@@ -133,31 +133,51 @@ class autoEMGui(autoEMBase):
 		#gobject.timeout_add(5000, self.update_usage)
 		self.gui_update_workstation()
 		self.gui_update_file()
+		self.update_usage()
 		self.add.connect('clicked', self.gui_add_workstation)
 		self.remove.connect('clicked', self.gui_remove_workstation)
 		self.about.connect('clicked', self.about_dialog)
+		self.window.connect("destroy", gtk.main_quit)
 
 		#Main
 		self.window.show_all()
+		self.gui_ask_info()
 		gtk.main()
 
 	def gui_update_file(self):
+		self.file_listbox.clear()
 		for item in self.list_file():
 			iter = self.file_listbox.append()
 			self.file_listbox.set(iter,
 				COLUMN_FIXED, False,
 				COLUMN_SIMULATION, item,
-				COLUMN_STATUS, ''
-				)
+				COLUMN_STATUS, '')
 
 	def gui_update_workstation(self):
+		self.host_listbox.clear()
 		for item in self.list_host():
 			iter = self.host_listbox.append()
 			self.host_listbox.set(iter,
 				COLUMN_HOST, item,
 				COLUMN_USAGE, '')
-		
 	
+	def gui_ask_info(self):
+		askinfo = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Input your username and password")
+		action_area = askinfo.get_content_area()
+		nameentry = gtk.Entry()
+		passentry = gtk.Entry()
+		passentry.set_visibility(False)
+		action_area.pack_start(nameentry)
+		action_area.pack_start(passentry)
+		askinfo.show_all()
+		response = askinfo.run()
+		if response == gtk.RESPONSE_OK:
+			self.set_info(nameentry.get_text(), passentry.get_text())
+		elif response == gtk.RESPONSE_CANCEL:
+			pass
+
+		askinfo.destroy()
+
 	def gui_remove_workstation(self, button):
 		"""show warning, call remove_workstation, update liststore"""
 		model, iter = self.host_selection.get_selected()
@@ -167,6 +187,7 @@ class autoEMGui(autoEMBase):
 			response = deletehost.run()
 			if response == gtk.RESPONSE_OK:
 				self.remove_workstation(model.get_value(iter,0))
+				self.gui_update_workstation()
 			deletehost.destroy()
 
 	def gui_add_workstation(self, button):
@@ -183,6 +204,7 @@ class autoEMGui(autoEMBase):
 			try:
 				socket.inet_aton(text)
 				self.add_workstaion(text)
+				self.gui_update_workstation()
 			except socket.error:
 				warning = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, "invalid IP")
 				warning.show_all()
