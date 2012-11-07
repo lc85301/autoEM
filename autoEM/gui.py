@@ -79,13 +79,6 @@ class autoEMGui(autoEMBase):
 			gobject.TYPE_BOOLEAN,
 			gobject.TYPE_STRING,
 			gobject.TYPE_STRING)
-		for item in self.list_file():
-			iter = self.file_listbox.append()
-			self.file_listbox.set(iter,
-				COLUMN_FIXED, False,
-				COLUMN_SIMULATION, item,
-				COLUMN_STATUS, ''
-				)
 		#file treeview
 		self.treeview_file = gtk.TreeView(self.file_listbox)
 		self.treeview_file.set_rules_hint(True)
@@ -99,11 +92,6 @@ class autoEMGui(autoEMBase):
 		self.host_listbox = gtk.ListStore(
 			gobject.TYPE_STRING,
 			gobject.TYPE_STRING)
-		for item in self.list_host():
-			iter = self.host_listbox.append()
-			self.host_listbox.set(iter,
-				COLUMN_HOST, item,
-				COLUMN_USAGE, '')
 			
 		#host treeview
 		self.treeview_host = gtk.TreeView(self.host_listbox)
@@ -143,12 +131,32 @@ class autoEMGui(autoEMBase):
 
 		#Connect
 		#gobject.timeout_add(5000, self.update_usage)
+		self.gui_update_workstation()
+		self.gui_update_file()
 		self.add.connect('clicked', self.gui_add_workstation)
 		self.remove.connect('clicked', self.gui_remove_workstation)
+		self.about.connect('clicked', self.about_dialog)
 
 		#Main
 		self.window.show_all()
 		gtk.main()
+
+	def gui_update_file(self):
+		for item in self.list_file():
+			iter = self.file_listbox.append()
+			self.file_listbox.set(iter,
+				COLUMN_FIXED, False,
+				COLUMN_SIMULATION, item,
+				COLUMN_STATUS, ''
+				)
+
+	def gui_update_workstation(self):
+		for item in self.list_host():
+			iter = self.host_listbox.append()
+			self.host_listbox.set(iter,
+				COLUMN_HOST, item,
+				COLUMN_USAGE, '')
+		
 	
 	def gui_remove_workstation(self, widget):
 		"""show warning, call remove_workstation, update liststore"""
@@ -158,10 +166,40 @@ class autoEMGui(autoEMBase):
 		else:
 			self.remove_workstation(model.get_value(iter,0))
 
-
 	def gui_add_workstation(self):
 		"""show pop out, get host and call add_workstaion, update liststore"""
 		self.add_workstaion()
+
+	def about_dialog(self, button):
+		"""about this program"""
+		about = gtk.AboutDialog()
+		about.set_position(gtk.WIN_POS_CENTER)
+		about.set_name(program_name)
+		about.set_version(program_version)
+		about.set_comments('Manage EM works Easily\n')
+		about.set_license('''
+			This program is free software; you can redistribute it and/or modify
+			it under the terms of the GNU General Public License as published by
+			the Free Software Foundation; either version 2 of the License, or
+			(at your option) any later version.
+			
+			This program is distributed in the hope that it will be useful,
+			but WITHOUT ANY WARRANTY; without even the implied warranty of
+			MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+			GNU General Public License for more details.
+			
+			You should have received a copy of the GNU General Public License
+			along with this program; if not, write to the Free Software Foundation,
+			Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+			''')
+		about.set_copyright('Copyright 2012 Lee You-Tang (YodaLee)')
+		about.set_website('https://github.com/lc85301/autoEM')
+		about.set_website_label('autoEM at GitHub')
+		about.set_authors(['Lee You-Tang (YodaLee) <lc85301@gmail.com>'])
+		about.set_translator_credits('Lee You-Tang (YodaLee)' '<lc85301@gmail.com>')
+		#about.set_logo(gtk.gdk.pixbuf_new_from_file_at_size(program_logo, 96, 96))
+		about.connect('response', lambda x, y, z: about.destroy(), True)
+		about.show_all()
 
 	def add_column_file(self, treeview):
 		"""add default column in treeview"""
