@@ -23,6 +23,7 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ##################################################################################
 
+import os.path
 import sys
 import platform
 import collections
@@ -32,10 +33,16 @@ running_os = platform.system()
 
 #Program Information
 program_name = 'autoEM'
-program_version = '0.1.0'
+program_version = '0.2.1'
 
+#for py2exe
 if running_os == "Windows":
 	program_logo = 'autoEM.png'
+
+if not sys.argv[0].startswith('/usr/bin'):
+	prefix = os.path.dirname(os.path.abspath(sys.argv[0]))
+	program_logo = prefix + '/images/' + program_name + '.png'
+
 
 #configure file storage
 config_file = "example.xml"

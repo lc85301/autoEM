@@ -1,4 +1,3 @@
-
 ##################################################################################
 #-*- coding: utf-8 -*-
 # 
@@ -33,6 +32,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gobject
+import socket
 
 #autoEM package
 from autoEM.base import autoEMBase
@@ -158,17 +158,37 @@ class autoEMGui(autoEMBase):
 				COLUMN_USAGE, '')
 		
 	
-	def gui_remove_workstation(self, widget):
+	def gui_remove_workstation(self, button):
 		"""show warning, call remove_workstation, update liststore"""
 		model, iter = self.host_selection.get_selected()
-		if iter is None:
-			pass
-		else:
-			self.remove_workstation(model.get_value(iter,0))
+		if iter is not None:
+			deletehost = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Are you sure you want to delete this host")
+			deletehost.show_all()
+			response = deletehost.run()
+			if response == gtk.RESPONSE_OK:
+				self.remove_workstation(model.get_value(iter,0))
+			deletehost.destroy()
 
-	def gui_add_workstation(self):
+	def gui_add_workstation(self, button):
 		"""show pop out, get host and call add_workstaion, update liststore"""
-		self.add_workstaion()
+		askhost = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Input the host IP")
+		action_area = askhost.get_content_area()
+		entry = gtk.Entry()
+		action_area.pack_start(entry)
+		askhost.show_all()
+		response = askhost.run()
+		if response == gtk.RESPONSE_OK:
+			#press ok, test host ip validation
+			text = entry.get_text()
+			try:
+				socket.inet_aton(text)
+				self.add_workstaion(text)
+			except socket.error:
+				warning = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, "invalid IP")
+				warning.show_all()
+				warning.run()
+				warning.destroy()
+		askhost.destroy()
 
 	def about_dialog(self, button):
 		"""about this program"""
@@ -197,7 +217,7 @@ class autoEMGui(autoEMBase):
 		about.set_website_label('autoEM at GitHub')
 		about.set_authors(['Lee You-Tang (YodaLee) <lc85301@gmail.com>'])
 		about.set_translator_credits('Lee You-Tang (YodaLee)' '<lc85301@gmail.com>')
-		#about.set_logo(gtk.gdk.pixbuf_new_from_file_at_size(program_logo, 96, 96))
+		about.set_logo(gtk.gdk.pixbuf_new_from_file_at_size(program_logo, 96,96))
 		about.connect('response', lambda x, y, z: about.destroy(), True)
 		about.show_all()
 
