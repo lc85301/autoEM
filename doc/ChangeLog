@@ -7,6 +7,7 @@ autoEM 0.2.1 (十一月 07, 2012):
 	* Complete add/remove workstation function
 	* Complete about dialog
 	* Add temporary program logo
+	* Add dialog ask user info when program start
 
 autoEM 0.2.0 (十一月 03, 2012):
 	Feature added:
